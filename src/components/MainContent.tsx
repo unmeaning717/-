@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { View } from '../types';
 import { ARTICLES, PROJECTS } from '../constants';
@@ -40,7 +40,7 @@ export default function MainContent({ view }: MainContentProps) {
           className="h-full"
         >
           <ScrollArea className="h-full" onScrollCapture={handleScroll}>
-            <div className="max-w-4xl mx-auto px-12 py-20">
+            <div className="max-w-4xl mx-auto px-6 md:px-12 py-12 md:py-20 pb-24 md:pb-20">
               {view === 'home' && <HomeView />}
               {view === 'intro' && <IntroView />}
               {view === 'travel' && <TravelView />}
@@ -153,20 +153,22 @@ function IntroView() {
 }
 
 function GuestbookView() {
-  const [messages, setMessages] = useState<any[]>([]);
-  const [newMsg, setNewMsg] = useState('');
+  const initialized = useRef(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newMsg.trim()) return;
-    setMessages([{
-      id: Date.now(),
-      user: 'Guest',
-      content: newMsg,
-      date: new Date().toISOString().split('T')[0]
-    }, ...messages]);
-    setNewMsg('');
-  };
+  useEffect(() => {
+    if (initialized.current) return;
+    initialized.current = true;
+
+    import('twikoo').then((twikoo) => {
+      const init = twikoo.init || twikoo.default?.init || twikoo.default;
+      init({
+        envId: 'https://meek-torrone-6db489.netlify.app/.netlify/functions/twikoo',
+        el: '#twikoo-comments',
+      });
+    }).catch((err) => {
+      console.error('Twikoo init failed:', err);
+    });
+  }, []);
 
   return (
     <div className="space-y-12">
@@ -175,31 +177,7 @@ function GuestbookView() {
         <p className="text-zinc-500 font-light">留下你的足迹，或者只是打个招呼。</p>
       </section>
 
-      <form onSubmit={handleSubmit} className="space-y-4 bg-zinc-950 p-6 border border-zinc-900">
-        <Textarea 
-          placeholder="输入你的留言..." 
-          value={newMsg}
-          onChange={(e) => setNewMsg(e.target.value)}
-          className="bg-black border-zinc-800 focus:border-zinc-500 rounded-none min-h-[100px] text-zinc-300"
-        />
-        <div className="flex justify-end">
-          <Button type="submit" className="bg-white text-black hover:bg-zinc-200 rounded-none px-8 uppercase text-xs tracking-widest font-bold">
-            发送
-          </Button>
-        </div>
-      </form>
-
-      <div className="space-y-8">
-        {messages.map((msg) => (
-          <div key={msg.id} className="border-l border-zinc-800 pl-6 py-2">
-            <div className="flex items-center gap-3 mb-2">
-              <span className="text-zinc-200 text-sm font-medium">{msg.user}</span>
-              <span className="text-[10px] font-mono text-zinc-600">{msg.date}</span>
-            </div>
-            <p className="text-zinc-400 text-sm font-light leading-relaxed">{msg.content}</p>
-          </div>
-        ))}
-      </div>
+      <div id="twikoo-comments" />
     </div>
   );
 }
@@ -255,67 +233,6 @@ function MediaView() {
             </a>
           );
         })}
-      </div>
-    </div>
-  );
-}
-
-function SetupView() {
-  const categories = [
-    {
-      title: 'Hardware / 硬件',
-      items: [
-        { name: 'MacBook Pro 14"', desc: 'M2 Pro / 16GB / 512GB' },
-        { name: 'Keychron Q1', desc: 'Gateron Brown / Custom Keycaps' },
-        { name: 'Logitech MX Master 3S', desc: 'Ergonomic Productivity' },
-        { name: 'Dell U2723QE', desc: '4K IPS Black / USB-C Hub' }
-      ]
-    },
-    {
-      title: 'Software / 软件',
-      items: [
-        { name: 'VS Code', desc: 'Theme: Tokyo Night / Font: JetBrains Mono' },
-        { name: 'Arc Browser', desc: 'The internet, but better' },
-        { name: 'Warp', desc: 'The terminal for the 21st century' },
-        { name: 'Obsidian', desc: 'Second Brain / Knowledge Base' }
-      ]
-    },
-    {
-      title: 'Lab Gear / 实验室',
-      items: [
-        { name: 'Rigol DS1102Z-E', desc: 'Digital Oscilloscope' },
-        { name: 'Pinecil V2', desc: 'Smart Portable Soldering Iron' },
-        { name: 'UNI-T UT61E+', desc: 'Digital Multimeter' },
-        { name: 'ESP32 / STM32', desc: 'Daily Drivers for MCU Projects' }
-      ]
-    }
-  ];
-
-  return (
-    <div className="space-y-16">
-      <section>
-        <h2 className="text-4xl font-light text-white mb-6">装备 / SETUP</h2>
-        <p className="text-zinc-500 font-light max-w-2xl">
-          工欲善其事，必先利其器。这里记录了我日常学习、开发和折腾时所使用的工具与装备。
-        </p>
-      </section>
-
-      <div className="grid grid-cols-1 gap-12">
-        {categories.map((cat) => (
-          <section key={cat.title} className="space-y-6">
-            <h3 className="text-[10px] uppercase tracking-[0.3em] text-zinc-600 font-medium border-b border-zinc-900 pb-2">
-              {cat.title}
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {cat.items.map((item) => (
-                <div key={item.name} className="p-6 bg-zinc-950 border border-zinc-900 hover:border-zinc-800 transition-colors">
-                  <h4 className="text-zinc-200 text-sm font-medium mb-1">{item.name}</h4>
-                  <p className="text-zinc-600 text-[11px] font-light uppercase tracking-wider">{item.desc}</p>
-                </div>
-              ))}
-            </div>
-          </section>
-        ))}
       </div>
     </div>
   );
