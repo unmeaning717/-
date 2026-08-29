@@ -212,8 +212,8 @@ function MediaView() {
 
           if (isEmail) {
             return (
-              <div 
-                key={p.name} 
+              <div
+                key={p.name}
                 className="p-8 bg-zinc-950 border border-zinc-900 flex justify-between items-center"
               >
                 {Content}
@@ -222,8 +222,8 @@ function MediaView() {
           }
 
           return (
-            <a 
-              key={p.name} 
+            <a
+              key={p.name}
               href={p.href}
               target="_blank"
               rel="noopener noreferrer"
@@ -242,16 +242,18 @@ function TravelView() {
   const visited = [
     { en: 'China', zh: '中国' },
     { en: 'Malaysia', zh: '马来西亚' },
-    { en: 'Singapore', zh: '新加坡' }
-  ];
-  const planned = [
-    { en: 'Vietnam', zh: '越南' },
+    { en: 'Singapore', zh: '新加坡' },
     { en: 'Thailand', zh: '泰国' }
   ];
-  
+  const planned = [
+    { en: 'Japan', zh: '日本' },
+    { en: 'Vietnam', zh: '越南' },
+    { en: 'South Korea', zh: '韩国' }
+  ];
+
   const visitedEn = visited.map(c => c.en);
   const plannedEn = planned.map(c => c.en);
-  
+
   return (
     <div className="space-y-16">
       <section>
@@ -283,9 +285,9 @@ function TravelView() {
             </div>
           </div>
         </div>
-        
+
         <WorldMap visitedCountries={visitedEn} plannedCountries={plannedEn} />
-        
+
         <div className="space-y-4">
           <h4 className="text-[10px] uppercase tracking-widest text-zinc-600">Visited / 已访问</h4>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
